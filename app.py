@@ -10,9 +10,9 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 def main(page: ft.Page):
-    page.title = 'Cadastro App'
+    page.title = 'App - Cadastro de Produtos'
     lista_produtos = ft.ListView()
-    
+
     def cadastrar(e):
         novo_produto = Produto(
             titulo=produto.value,
@@ -20,9 +20,21 @@ def main(page: ft.Page):
         )
         session.add(novo_produto)
         session.commit()
+        lista_produtos.controls.append(ft.Container(
+                ft.Text(produto.value + f' - R$ {preco.value}'),
+                bgcolor=ft.Colors.BLACK12,
+                padding=15,
+                alignment=ft.alignment.center,
+                margin=3,
+                border_radius=10
+            ))
+        page.update()
         print(f'Produto {novo_produto.titulo} cadastrado com sucesso!')
 
-    txt_titulo = ft.Text('Título do produto: ') 
+    txt_erro = ft.Container(ft.Text('Erro ao salkvar o produto!'), bgcolor=ft.Colors.RED, padding=10, visible=False, alignment=ft.alignment.center)
+    txt_erro = ft.Container(ft.Text('Produto salvo com sucesso!'), bgcolor=ft.Colors.RED, padding=10, visible=False, alignment=ft.alignment.center)
+
+    txt_titulo = ft.Text('Cadastrar novo produto') 
     produto = ft.TextField(label='Digite o titulo do  produto...', text_align=ft.TextAlign.LEFT)
     txt_preco = ft.Text('Preço do produto: ')
     preco = ft.TextField(value=0, label='Digite o preço do produto...', text_align=ft.TextAlign.LEFT)
@@ -35,5 +47,21 @@ def main(page: ft.Page):
         preco,
         btn_produto
     )
-    
+
+    for p in session.query(Produto).all():
+        lista_produtos.controls.append(
+            ft.Container(
+                ft.Text(f'{p.titulo} - R$ {p.preco:.2f}'),
+                bgcolor=ft.Colors.BLACK12,
+                padding=15,
+                alignment=ft.alignment.center,
+                margin=3,
+                border_radius=10
+            )
+        )
+
+    page.add(
+        lista_produtos,
+    )
+
 ft.app(target=main)
